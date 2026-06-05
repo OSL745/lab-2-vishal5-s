@@ -1,6 +1,6 @@
 #!/bin/bash
-# Author:
-# Date:
+# Author: vishal
+# Date: 2025-06-04
 # Purpose: To automate virtual machine back up and restoration
 # Usage: ./vs [options]
 #
@@ -34,7 +34,7 @@
 # For this to work properly the directories contained in the variable must exist.  If you're doing a restore on a fresh install of the host, create the directory contained in dpath and copy the files there before you begin the process.
 
 # destination path:
-dpath='/home/jmcarman/backups'
+dpath='/home/vishal5/backups'
 
 # source path:
 spath='/var/lib/libvirt/images'
@@ -53,48 +53,49 @@ logfile=virtualsafety-log.txt
 #########################################################################################
 
 # A function to back up the virtual machines
-
+fuction backup() {
 
 	# Change directory to where the virtual machines are stored as files
-
+    cd $spath
 	
 	# Use virsh dumpxml to create a backup of the xml file for the virtual machine
-
+    virsh dumpxml $vm >$dpath/$vm.xml
 
 	# tell the user the back up is in progress
-
+    echo "Creating backup of $vm in $dpath"
 	
 	# Use touch to create the backup destination file if it doesn't exist, update the time and date stamp if it does
-
+    touch $dpath/$vm.backup.gz
 	
 	# gzip images and store them in back up directory, run in the background
+    gzip < $spath/$vm.qcow2 > $dpath/$vm.qcow2.gz & progress --monitor --pid=$!
 
 	
 	# Append the name of the virtual machine to the log message variable (logMsg)
-
-
+    logMsg="$logMsg $vm,"
+}
 
 # A function to restore the virtual machines
-
+function restore() {
 
 	# Change directory to where the virtual machine backups are stored
-
+    cd $spath
 
 	# Tell the user the restoration is in progress
-
+    cd $spath
 
 	# Use the gunzip command to unzip the backup file and restore it to /var/lib/libvirt/images
-
+    gunzip < $dpath/$vm.qcow2.gz > $spath/$vm.qcow2 & progress --monitor --pid=$!
 
 	# Append the name of the virtual machine to the log message variable (logMsg)
-
+    logMsg="$logMsg $vm,"
 
 	# Copy the xml file to the /var/lib/libvirt/images directory
-
+    cp $spath/$vm.xml $dpath/$vm.xml
 
 	# Use virsh define to define the virtual machine
-
-
+    virsh define $vm.xml
+}
 
 # A function to create and update the log file
 function logfile () {
