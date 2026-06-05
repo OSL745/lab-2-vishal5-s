@@ -53,7 +53,7 @@ logfile=virtualsafety-log.txt
 #########################################################################################
 
 # A function to back up the virtual machines
-fuction backup() {
+function backup() {
 
 	# Change directory to where the virtual machines are stored as files
     cd $spath
